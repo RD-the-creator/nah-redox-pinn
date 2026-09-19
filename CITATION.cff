@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite the accompanying paper."
+title: "Kinetic Modeling of Nicotinamide's Catalytically-governed Redox Cycle Using PINNs — code and data"
+abstract: >-
+  Mechanistic (ODE) and physics-informed neural network models of the
+  catalytically-governed redox cycle of a synthetic nicotinamide analogue (NAH),
+  with the data, fits and comparison reported in the paper.
+authors:
+  - family-names: Roshanasan
+    given-names: Ardeshir
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+    # affiliation: "add if you want it shown"
+license: MIT
+repository-code: "https://github.com/RD-the-creator/nah-redox-pinn"
+keywords:
+  - chemical kinetics
+  - physics-informed neural networks
+  - nicotinamide
+  - reaction mechanism
+  - NADH analogue
+preferred-citation:
+  type: article
+  title: "Kinetic Modeling of Nicotinamide's Catalytically-governed Redox Cycle Using PINNs"
+  authors:
+    - family-names: Roshanasan
+      given-names: Ardeshir
+  year: 2026
+  # journal: "add on acceptance"
+  # doi: "add on acceptance"
