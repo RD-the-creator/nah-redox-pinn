@@ -6,7 +6,7 @@ for each seed. For every seed this saves, to results/pinn_e{EPOCHS}/seed{s}.npz:
     test_idx, pinn_test, r2_testfold       the 46 test rows
     hold_pts, r2_holdout, plateau60        the MB = 10 uM curve at its 14 measured times
     t_dense, hold_dense                    the same curve on a 0-60 min grid (241 points)
-    loss                                   training loss per epoch (Figure S4)
+    loss                                   training loss per epoch (08_figures.py)
 Nothing is computed from these here: 05_compare.py and 08_figures.py read them.
 
 Usage:  python 04_pinn_train.py [--seeds 0 1 2] [--epochs 1100]

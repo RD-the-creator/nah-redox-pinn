@@ -3,8 +3,8 @@
   results/fig_holdout_mb10.png   fig:result1   held-out MB = 10 uM: data, mechanistic model,
                                                PINN mean of 3 seeds and seed range
   results/fig_PINN_parity.png    fig:PINN_parity  test fold (46 rows), PINN seed 0
-  results/fig_S4_pinn_loss.png   Figure S4     training loss of seed 0, with the epoch at
-                                               which the learning rate is first halved
+  results/fig_pinn_loss.png      (not in the paper) training loss of seed 0, with the
+                                               epoch at which the learning rate is first halved
 
 R2 values in legends are rounded to two decimals, half up. 600 dpi.
 Usage:  python 08_figures.py [--epochs 1100]
@@ -84,7 +84,7 @@ fig.tight_layout(); fig.savefig(K.RESULTS / "fig_PINN_parity.png", dpi=DPI, bbox
 plt.close(fig)
 
 
-# ---- training loss, Figure S4 ----------------------------------------------------------
+# ---- training loss ----------------------------------------------------------
 def first_lr_halving(loss, patience):
     """Replays SciANN's default ReduceLROnPlateau (monitor = training loss, patience =
     epochs/10, factor 0.5): the first epoch at which the learning rate is halved."""
@@ -114,7 +114,7 @@ if e_lr:
 ax.set_xlabel("Epoch"); ax.set_ylabel("Training loss"); ax.set_xlim(0, len(L)); ax.grid(alpha=0.3)
 ax.legend(loc="upper right", bbox_to_anchor=(0.62, 1.0), frameon=True, framealpha=0.9,
           fontsize=5.5, handlelength=1.6, labelspacing=0.3, borderpad=0.4)
-fig.tight_layout(); fig.savefig(K.RESULTS / "fig_S4_pinn_loss.png", dpi=DPI, bbox_inches="tight")
+fig.tight_layout(); fig.savefig(K.RESULTS / "fig_pinn_loss.png", dpi=DPI, bbox_inches="tight")
 plt.close(fig)
 
 print(f"held-out: PINN (mean prediction) R2 = {r2_mp:.4f} -> {r2s(r2_mp)};  mechanistic {r2_mech:.4f} -> {r2s(r2_mech)}")

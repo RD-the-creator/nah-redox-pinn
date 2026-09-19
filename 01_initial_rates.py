@@ -4,7 +4,8 @@ Fits v = K1 k2 [F][Rh] / (1 + K1 [F]) to the initial rates of the fuel and Rh-ca
 series (data/initial_rates.csv), first on the fuel series alone and then jointly on both.
 
 Reproduces (paper, 'Fuel-driven Reduction'): k2 = 2.08e-3 s^-1, K1 = 33.8 M^-1,
-K_M = 1/K1 ~ 30 mM, and fig:F_fit / Figure S1.
+K_M = 1/K1 ~ 30 mM, R2 > 0.99 (formate series, fig:F_fit), and the joint fit
+K1 = 49 +/- 30 M^-1, k2 = (1.6 +/- 0.5)e-3 s^-1 used as a first-order check on the catalyst.
 The constants carried forward into the ODE model (kinetics.py) are k3 = 2.077e-3 s^-1 x 60
 and k1/k2 = K1 / 1e6 = 3.37e-5 uM^-1 (script notation).
 """
@@ -38,9 +39,11 @@ def rate_model(x, K_eq, k):
 (k_1, KM_1), cov1 = curve_fit(mm, F1, v1 / Cat1, p0=[2e-3, 0.03], bounds=([0, 0], [np.inf, np.inf]))
 k_1_err, KM_1_err = np.sqrt(np.diag(cov1))
 
-# joint fit, both series
+# joint fit, both series. Fitted in uM/min: in M/s the residuals (~1e-8) are so small that
+# the optimiser stops at its starting point.
 F_all, Cat_all, v_all = np.r_[F1, F2], np.r_[Cat1, Cat2], np.r_[v1, v2]
-(K_eq, k_j), cov2 = curve_fit(rate_model, (F_all, Cat_all), v_all, p0=[1 / KM_1, k_1],
+(K_eq, k_j), cov2 = curve_fit(lambda x, K_eq, k: rate_model(x, K_eq, k) / conv, (F_all, Cat_all),
+                              v_all / conv, p0=[1 / KM_1, k_1],
                               bounds=([0, 0], [np.inf, np.inf]), maxfev=20000)
 K_eq_err, k_j_err = np.sqrt(np.diag(cov2))
 r2_joint = K.r2(v_all, rate_model((F_all, Cat_all), K_eq, k_j))
@@ -57,7 +60,7 @@ json.dump({"fuel_only": {"k_s": k_1, "K1_M": 1 / KM_1, "KM_mM": KM_1 * 1e3, "r2"
            "joint": {"k_s": k_j, "K1_M": K_eq, "r2": r2_joint}},
           open(K.RESULTS / "01_initial_rates.json", "w"), indent=1)
 
-# figures: fig:F_fit and Figure S1
+# figures: fig:F_fit and the catalyst-linearity check
 Fr = np.linspace(0, 22e-3, 200)
 fig, ax = plt.subplots(figsize=(3.5, 2.6))
 ax.scatter(F1 * 1e3, v1 / Cat1, s=18, color="C0", edgecolors="black", linewidths=0.5, zorder=3,
@@ -73,6 +76,8 @@ fig, ax = plt.subplots(figsize=(3.5, 2.6))
 ax.scatter(Cat2 * 1e6, v2, s=18, color="C0", edgecolors="black", linewidths=0.5, zorder=3,
            label="Experimental results")
 ax.plot(Cr * 1e6, slope * Cr, "k-", lw=1.2, label="Joint fit")
+s1 = k_1 * F2[0] / (KM_1 + F2[0])
+ax.plot(Cr * 1e6, s1 * Cr, "k--", lw=1.0, label="Formate series only")
 ax.set_xlabel("Rh-catalyst (µM)"); ax.set_ylabel("$v_0$ (M s$^{-1}$)")
 ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0)); ax.grid(alpha=0.3); ax.legend(fontsize=6.5)
 fig.tight_layout(); fig.savefig(K.RESULTS / "01_catalyst_linearity.png", dpi=600); plt.close(fig)

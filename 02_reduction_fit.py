@@ -6,7 +6,8 @@ k1/k2 fixed from 01 and k1 fixed at a representative value.
 
 Reproduces (paper, 'Fuel-driven Reduction'): in-sample R2 = 0.93; K3 = 1.53 +/- 0.10
 (Keq3 here); the k1 sensitivity scan showing R2 and Keq3 flat over six decades of k1;
-the conversion plots of the three series; and Figure S2 (1000x fuel and substrate).
+the conversion plots of the three series; and the 1000x fuel-and-substrate extrapolation
+discussed in the text (02_scaled_conversion.png).
 
 Usage:  python 02_reduction_fit.py [--no-scan]
 """
@@ -99,7 +100,7 @@ for name, ids, lab in [("fuel", K.FUEL_SERIES, "Fuel {:.1f} mM"),
     ax.legend(fontsize=6)
     fig.tight_layout(); fig.savefig(K.RESULTS / f"02_conversion_{name}.png", dpi=600); plt.close(fig)
 
-# --- Figure S2: 1000x fuel and substrate --------------------------------------------
+# --- 1000x fuel and substrate extrapolation --------------------------------------------
 y0b = [20e3, 40.0, 0, 0, 80.0, 0]
 y0h = [1000 * 20e3, 40.0, 0, 0, 1000 * 80.0, 0]
 tt = np.linspace(0, 180, 1200)

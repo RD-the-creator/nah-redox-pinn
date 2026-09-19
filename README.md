@@ -29,14 +29,14 @@ NAH is the reduced nicotinamide analogue. Units are µM and minutes, and fuel is
 |---|---|---|
 | `kinetics.py` | Shared module: data loaders, the reaction network, the fitted rate constants, the ODE predictor, and the re-fit of the free constants on a subset of rows. | Mechanism |
 | `pinn.py` | Shared module: the PINN, defined once. The reported configuration is `pinn.FINAL` (mass-balance bound on the plateau, 100 time + 1600 condition-space collocation points, 40-30-20-10, Taylor order 2) at 1100 epochs. | PINN section |
-| `01_initial_rates.py` | Saturation fit of the initial rates. | k₂ = 2.08×10⁻³ s⁻¹, K₁ = 33.8 M⁻¹, K_M ≈ 30 mM; fig:F_fit, Fig. S1 |
-| `02_reduction_fit.py` | Global fit of the reduction half-cycle to the 12 reduction curves, plus the k₁ sensitivity scan. | R² = 0.93, K₃ = 1.53 ± 0.10; conversion plots; Fig. S2 |
-| `03_oxidation_fit.py` | Fit of k₄ and k₅ (paper notation) to the five MB curves, excluding MB = 10 µM, plus the profile likelihood. | R² = 0.94, 3.8×10² M⁻¹ s⁻¹ (±20 %), 2.8×10⁻³ s⁻¹ (±11 %); Fig. S3 |
+| `01_initial_rates.py` | Saturation fit of the initial rates. | k₂ = 2.08×10⁻³ s⁻¹, K₁ = 33.8 M⁻¹, K_M ≈ 30 mM, R² > 0.99; joint fit K₁ = 49 ± 30 M⁻¹, k₂ = (1.6 ± 0.5)×10⁻³ s⁻¹ (first-order check on the catalyst); fig:F_fit |
+| `02_reduction_fit.py` | Global fit of the reduction half-cycle to the 12 reduction curves, plus the k₁ sensitivity scan. | R² = 0.93, K₃ = 1.53 ± 0.10; conversion plots; the 1000× fuel-and-substrate extrapolation |
+| `03_oxidation_fit.py` | Fit of k₄ and k₅ (paper notation) to the five MB curves, excluding MB = 10 µM, plus profile likelihoods for both. | R² = 0.94, 3.8×10² M⁻¹ s⁻¹ (±20 %), 2.8×10⁻³ s⁻¹ (±11 %); 95 % profile intervals 275–550 M⁻¹ s⁻¹ and 2.4–3.5×10⁻³ s⁻¹ |
 | `04_pinn_train.py` | Trains the PINN on the outer split (181/46 rows) for seeds 0–2 and saves test-fold and held-out predictions and the loss history. | Input to 05 and 08 |
 | `05_compare.py` | PINN vs mechanistic model on the test fold and the held-out curve, the refit control, and the epoch-sensitivity table. | 0.96 vs 0.90; refit 0.90; 0.79 vs 0.26; 23.8 / 28.6 / 18.0 µM; Appendix plateau spread 0.46 µM |
 | `06_split50.py` | 50 random 80/20 splits. For each split: one PINN (seed = split index) and the mechanistic model re-fitted on that split's training rows. Paired Wilcoxon test. | 0.98 vs 0.93, PINN higher on 50/50 |
 | `07_epoch_selection.py` | Inner-validation sweep on the training rows only, with the pre-declared 1-sd rule. `--config M0` is the sweep that selected 1100. `--config M2` is the repeat on the final configuration. | Appendix |
-| `08_figures.py` | The PINN figures, built from the `04` outputs. | fig:result1, fig:PINN_parity, Fig. S4 |
+| `08_figures.py` | The PINN figures, built from the `04` outputs. | fig:result1, fig:PINN_parity; training-loss figure (not in the paper) |
 
 Notation: the scripts number the rate constants by elementary step, and the paper uses its own names. `kinetics.py` has the mapping. For example, the script's k6 and k8 are the paper's k₄ and k₅, and `Keq3` is K₃.
 
@@ -49,11 +49,13 @@ PINN training is slow: roughly 10–20 min per fit on a laptop CPU, and several 
 - `split50.csv` holds the per-split R² of both models.
 - `epoch_sweep_M0.csv`, `epoch_sweep_M2.csv` are the two validation sweeps.
 
-With these files, `python 05_compare.py`, `python 06_split50.py --ode-only` and `python 08_figures.py` reproduce the paper's numbers and figures without any training. The figures are pixel-identical to those in the paper. Re-running 04, 06 or 07 overwrites the corresponding files.
+With these files, `python 05_compare.py`, `python 06_split50.py --ode-only` and `python 08_figures.py` reproduce the paper's numbers and figures without any training. The two PINN figures are pixel-identical to those in the paper. Re-running 04, 06 or 07 overwrites the corresponding files.
 
 ## Notes on reproducibility
 
 - **PINN results depend slightly on the TensorFlow thread count.** Seeds are fixed, but the thread count changes the floating-point summation order. This moves R² by about 0.001–0.005 and the 60-min plateau by a few hundredths of a µM. Set `PINN_THREADS=n` to fix the thread count.
+- **Initial-rate joint fit.** It is fitted in µM min⁻¹. In M s⁻¹ the residuals (~10⁻⁸) are so small that the optimiser stops at its starting point, which in earlier versions of this analysis made the joint fit look identical to the formate-only fit.
+- **Profile likelihoods are scaled by the residual variance.** The sums of squares are unweighted (µM²), so they are divided by σ̂² = SSR_min/(N − 2) before the χ²(1) threshold of 3.84 is applied.
 - **Some ODE re-fits differ in the fourth decimal.** k4 (script notation) is not identifiable, so the least-squares re-fit can end at different k4 values with the same fit quality. As a result, a few split-wise ODE R² values can differ in the fourth decimal between library versions (e.g. split 1: 0.9240 stored, 0.9243 re-computed). For the same reason, the standard error of K₃ from `02` ranges from 0.097 to 0.109 depending on the lmfit/scipy version. K₃ itself and R² do not change.
 - **The original 1100-epoch selection used an earlier module.** The `07 --config M0` sweep that selected 1100 epochs was run with an earlier version of `pinn.py` that had the same model and preprocessing. A re-run should reproduce the selection, though not every digit of the stored curve.
 - **The M2 repeat sweep rises slowly and does not plateau.** Mean inner-validation R² goes from 0.985 at 800 epochs to 0.992 at 3000 (0.987 at 1100). Applied to this sweep, the 1-sd rule would select 1700. The held-out plateau at 800 / 1100 / 1700 epochs differs by 0.46 µM (05).
