@@ -13,7 +13,7 @@ Usage:  python 04_pinn_train.py [--seeds 0 1 2] [--epochs 1100]
         (env PINN_THREADS=n to fix the TensorFlow thread count)
 About 10-20 min per seed on a laptop CPU at 1100 epochs.
 Reported runs: seeds 0-2 at 1100 epochs (paper), and at 800 and 1700 epochs for the
-epoch-sensitivity check in the Appendix.
+epoch-sensitivity check (not reported in the paper).
 """
 import argparse
 import os

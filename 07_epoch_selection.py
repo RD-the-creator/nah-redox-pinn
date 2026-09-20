@@ -9,7 +9,7 @@ R2 lies within one standard deviation of the best mean.
 
   --config M0   5 seeds to 4000 epochs: the selection that fixed 1100 epochs (Appendix).
   --config M2   3 seeds to 3000 epochs: the repeat on the final configuration, showing
-                the validation curve is flat from about 800 epochs on.
+                the validation curve rises slowly and does not plateau (see README).
 
 Usage:  python 07_epoch_selection.py --config M0|M2 [--seeds ...] [--max-epochs ...]
 Writes results/epoch_sweep_{config}.csv. Several hours per seed at 3000-4000 epochs.

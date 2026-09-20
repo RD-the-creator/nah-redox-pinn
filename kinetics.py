@@ -14,7 +14,7 @@ Mechanism (state vector [F, PC, FPC, C, S, P, C2, C2D]):
     5.  C2D       -> C2           k8          re-oxidation of reduced MB by O2
 Steps 1-3 alone are the reduction half-cycle (6 species, no MB).
 
-Paper notation: k1, k-1, k2, K3 = k3/k-3, k4, k5 correspond here to
+Paper notation: k1, k-1, k2, K3 = k3/k-3, k4, k5' correspond here to
 k1, k2, k3, Keq3 = k4/k5, k6, k8.
 """
 from pathlib import Path

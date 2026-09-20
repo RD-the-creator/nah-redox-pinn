@@ -31,21 +31,21 @@ NAH is the reduced nicotinamide analogue. Units are µM and minutes, and fuel is
 | `pinn.py` | Shared module: the PINN, defined once. The reported configuration is `pinn.FINAL` (mass-balance bound on the plateau, 100 time + 1600 condition-space collocation points, 40-30-20-10, Taylor order 2) at 1100 epochs. | PINN section |
 | `01_initial_rates.py` | Saturation fit of the initial rates. | k₂ = 2.08×10⁻³ s⁻¹, K₁ = 33.8 M⁻¹, K_M ≈ 30 mM, R² > 0.99; joint fit K₁ = 49 ± 30 M⁻¹, k₂ = (1.6 ± 0.5)×10⁻³ s⁻¹ (first-order check on the catalyst); fig:F_fit |
 | `02_reduction_fit.py` | Global fit of the reduction half-cycle to the 12 reduction curves, plus the k₁ sensitivity scan. | R² = 0.93, K₃ = 1.53 ± 0.10; conversion plots; the 1000× fuel-and-substrate extrapolation |
-| `03_oxidation_fit.py` | Fit of k₄ and k₅ (paper notation) to the five MB curves, excluding MB = 10 µM, plus profile likelihoods for both. | R² = 0.94, 3.8×10² M⁻¹ s⁻¹ (±20 %), 2.8×10⁻³ s⁻¹ (±11 %); 95 % profile intervals 275–550 M⁻¹ s⁻¹ and 2.4–3.5×10⁻³ s⁻¹ |
+| `03_oxidation_fit.py` | Fit of k₄ and k₅′ (paper notation; k₅′ = k₅[O₂][H⁺] is the pseudo-first-order MB regeneration constant) to the five MB curves, excluding MB = 10 µM, plus profile likelihoods for both. | R² = 0.94, 3.8×10² M⁻¹ s⁻¹ (±20 %), 2.8×10⁻³ s⁻¹ (±11 %); 95 % profile intervals 275–550 M⁻¹ s⁻¹ and 2.4–3.5×10⁻³ s⁻¹ |
 | `04_pinn_train.py` | Trains the PINN on the outer split (181/46 rows) for seeds 0–2 and saves test-fold and held-out predictions and the loss history. | Input to 05 and 08 |
-| `05_compare.py` | PINN vs mechanistic model on the test fold and the held-out curve, the refit control, and the epoch-sensitivity table. | 0.96 vs 0.90; refit 0.90; 0.79 vs 0.26; 23.8 / 28.6 / 18.0 µM; Appendix plateau spread 0.46 µM |
+| `05_compare.py` | PINN vs mechanistic model on the test fold and the held-out curve, the refit control, and an epoch-sensitivity table (not in the paper). | 0.96 vs 0.90; refit 0.90; 0.79 vs 0.26; 23.8 / 28.6 / 18.0 µM |
 | `06_split50.py` | 50 random 80/20 splits. For each split: one PINN (seed = split index) and the mechanistic model re-fitted on that split's training rows. Paired Wilcoxon test. | 0.98 vs 0.93, PINN higher on 50/50 |
 | `07_epoch_selection.py` | Inner-validation sweep on the training rows only, with the pre-declared 1-sd rule. `--config M0` is the sweep that selected 1100. `--config M2` is the repeat on the final configuration. | Appendix |
 | `08_figures.py` | The PINN figures, built from the `04` outputs. | fig:result1, fig:PINN_parity; training-loss figure (not in the paper) |
 
-Notation: the scripts number the rate constants by elementary step, and the paper uses its own names. `kinetics.py` has the mapping. For example, the script's k6 and k8 are the paper's k₄ and k₅, and `Keq3` is K₃.
+Notation: the scripts number the rate constants by elementary step, and the paper uses its own names. `kinetics.py` has the mapping. For example, the script's k6 and k8 are the paper's k₄ and k₅′, and `Keq3` is K₃.
 
 ## Reported runs (`results/`)
 
 PINN training is slow: roughly 10–20 min per fit on a laptop CPU, and several hours per seed for the 07 sweeps. So `results/` already holds the outputs of the runs reported in the paper:
 
 - `pinn_e1100/seed{0,1,2}.npz` are the reported 1100-epoch fits. For seeds 1 and 2, the held-out curves and the test-fold scores come from two separate runs that used the same settings. Each file records this in its `provenance` field.
-- `pinn_e800/`, `pinn_e1700/` hold the per-seed scalars from the epoch-sensitivity check.
+- `pinn_e800/`, `pinn_e1700/` hold the per-seed scalars from the epoch-sensitivity check (not reported in the paper).
 - `split50.csv` holds the per-split R² of both models.
 - `epoch_sweep_M0.csv`, `epoch_sweep_M2.csv` are the two validation sweeps.
 
